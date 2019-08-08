@@ -12,8 +12,7 @@ public class CameraScript : MonoBehaviour
     [Range(0.1f, 1f)]
     private float smoothness = 0.1f;
     [SerializeField]
-    private float rotationspeed = 0f;
-    
+    private float rotationspeed = 1f;
 
     void Start()
     {
@@ -27,9 +26,12 @@ public class CameraScript : MonoBehaviour
         Quaternion rot = Quaternion.AngleAxis(Input.GetAxis("Mouse X") * rotationspeed, Vector3.up);
         offset = rot * offset;
 
+        float zoomFactor = (1 + -Input.GetAxis("Mouse ScrollWheel"));
+        offset = zoomFactor*offset;
+        
         Vector3 newPos = playerTrans.position + offset;
 
         transform.position = Vector3.Slerp(transform.position, newPos, smoothness);
-        transform.LookAt(playerTrans);
+        transform.LookAt(playerTrans.position + playerTrans.up);
     }
 }
