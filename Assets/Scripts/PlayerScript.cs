@@ -17,10 +17,11 @@ public class PlayerScript : MonoBehaviour
     [SerializeField] private float jumpForce = 0f;
     [SerializeField] private float fallmult = 1.5f;
     [SerializeField] private float lowmult = 1f;
+    [SerializeField] private float jumpDiagonal = 0f;
 
     bool isGrounded()
     {
-        return Physics.Raycast(transform.position, -transform.up, dtog + 0.01f);
+        return Physics.Raycast(transform.position + Vector3.up, -transform.up, 1.1f);
     }
 
     // Start is called before the first frame update
@@ -29,8 +30,8 @@ public class PlayerScript : MonoBehaviour
         rb = GetComponent<Rigidbody>();
         mycollider = GetComponent<Collider>();
         anim = GetComponent<Animator>();
-        dtog = mycollider.bounds.extents.y;
-        Debug.Log(dtog);
+        //dtog = mycollider.bounds.extents.y;
+        //Debug.Log(dtog);
     }
 
     // Update is called once per frame
@@ -39,6 +40,8 @@ public class PlayerScript : MonoBehaviour
         #region Jumping
         if (isGrounded() && Input.GetKeyDown("space"))
         {
+            anim.SetBool("inAir", !isGrounded());
+
             rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
             //djump = isGrounded() ? 0 : djump + 1;
         }
@@ -51,19 +54,22 @@ public class PlayerScript : MonoBehaviour
         else if (rb.velocity.y > 0 && !Input.GetKey("space"))
         {
             rb.velocity += Vector3.up * Physics.gravity.y * lowmult * Time.deltaTime;
-        } 
+        }
         #endregion
 
         #region Animations
         anim.SetFloat("inputH", Input.GetAxis("Horizontal"));
         anim.SetFloat("inputV", Input.GetAxis("Vertical"));
         anim.SetFloat("absV", Mathf.Abs(Input.GetAxis("Vertical")));
+        anim.SetFloat("velMagn", Vector3.Magnitude(rb.velocity));
 
-        if (Vector3.Magnitude(rb.velocity) > 1.5f)
+        if (Vector3.Magnitude(new Vector3(rb.velocity.x, 0, rb.velocity.z)) > 1.5f)
             anim.SetBool("running", true);
         else anim.SetBool("running", false);
+
+        anim.SetBool("inAir", !isGrounded());
         #endregion
-        
+
     }
 
 
@@ -82,7 +88,8 @@ public class PlayerScript : MonoBehaviour
 
         if (Input.GetAxis("Vertical") < 0)
         {
-            rb.velocity = transform.forward * Input.GetAxis("Vertical") * walkSpeed * backpaddle;
+            Vector3 oldVelY = new Vector3(0f, rb.velocity.y, 0f);
+            rb.velocity = transform.forward * Input.GetAxis("Vertical") * walkSpeed * backpaddle + oldVelY;
         }
 
         if (Input.GetButton("Horizontal"))
