@@ -949,9 +949,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   maxForwardSpeed: 4
+  walkSpeed: 2.5
   gravity: 20
-  maxTurnSpeed: 1000
-  minTurnSpeed: 200
+  maxTurnSpeed: 500
+  minTurnSpeed: 100
 --- !u!114 &1824264158
 MonoBehaviour:
   m_ObjectHideFlags: 0

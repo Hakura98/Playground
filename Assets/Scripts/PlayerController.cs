@@ -12,6 +12,7 @@ public class PlayerController : MonoBehaviour
     }
 
     public float maxForwardSpeed = 4f;
+    public float walkSpeed = 1f;
     public float gravity = 20f;
     public float maxTurnSpeed = 1200f;
     public float minTurnSpeed = 400f;
@@ -102,7 +103,7 @@ public class PlayerController : MonoBehaviour
         if (moveInput.SqrMagnitude() > 1)
             moveInput.Normalize();
 
-        m_DesiredSpeed = moveInput.magnitude * maxForwardSpeed;
+        m_DesiredSpeed = m_Input.IsSprinting? moveInput.magnitude * maxForwardSpeed : moveInput.magnitude * walkSpeed;
         m_ForwardSpeed = Mathf.MoveTowards(m_ForwardSpeed, m_DesiredSpeed, Time.deltaTime * k_acceleration);
         m_Animator.SetFloat(m_HashForwardSpeed, m_ForwardSpeed);
     }
@@ -123,17 +124,18 @@ public class PlayerController : MonoBehaviour
     {
         Vector2 Input = m_Input.MovementInput;
         Vector3 Direction = new Vector3(Input.x, 0f, Input.y);
-
         Quaternion Offset = Quaternion.FromToRotation(Vector3.forward, Direction.normalized);
-        Quaternion TargetRotation = Quaternion.LookRotation(Offset * transform.forward.normalized);
+        Quaternion TargetRotation = Quaternion.LookRotation(Offset * transform.forward);
         m_Rotation = TargetRotation;
     }
 
     private void UpdateRotation()
     {
+
         float rotSpeed = m_DesiredSpeed == 0 ? 0 : m_ForwardSpeed / m_DesiredSpeed;
         float groundTurnSpeed = Mathf.Lerp(maxTurnSpeed, minTurnSpeed, rotSpeed);
         m_Rotation = Quaternion.RotateTowards(transform.rotation, m_Rotation, groundTurnSpeed * Time.deltaTime);
+
         transform.rotation = m_Rotation;
     }
 }
