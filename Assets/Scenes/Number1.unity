@@ -948,11 +948,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e0c999742eaf41e4bad9bd072bc723ca, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxForwardSpeed: 4
-  walkSpeed: 2.5
+  maxForwardSpeed: 6
+  walkSpeed: 4
   gravity: 20
   maxTurnSpeed: 500
   minTurnSpeed: 100
+  jumpSpeed: 10
 --- !u!114 &1824264158
 MonoBehaviour:
   m_ObjectHideFlags: 0

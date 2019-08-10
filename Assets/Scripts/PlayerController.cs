@@ -16,6 +16,7 @@ public class PlayerController : MonoBehaviour
     public float gravity = 20f;
     public float maxTurnSpeed = 1200f;
     public float minTurnSpeed = 400f;
+    public float jumpSpeed = 10f;
 
     #region Membervariable
     protected PlayerInput m_Input;
@@ -26,17 +27,20 @@ public class PlayerController : MonoBehaviour
     protected float m_VerticalSpeed;
     protected bool m_Grounded = true;
     protected Quaternion m_Rotation;
+    protected bool m_readyJump = false;
     #endregion
 
     #region Hash
     readonly int m_HashForwardSpeed = Animator.StringToHash("ForwardSpeed");
     readonly int m_HashGrounded = Animator.StringToHash("Grounded");
+    readonly int m_HashVerticalSpeed = Animator.StringToHash("AirVerticalSpeed");
     #endregion
 
     #region Constants
     const float k_acceleration = 20f;
     const float k_stickyGravitation = 0.3f;
     const float k_distanceToGroundRay = 1.0f;
+    const float k_fastFall = 10f;
     #endregion
 
     private void Awake()
@@ -93,6 +97,9 @@ public class PlayerController : MonoBehaviour
 
         m_Grounded = m_CharCtrl.isGrounded;
 
+        if (!m_Grounded)
+            m_Animator.SetFloat(m_HashVerticalSpeed, m_VerticalSpeed);
+
         m_Animator.SetBool(m_HashGrounded, m_Grounded);
     }
 
@@ -110,12 +117,29 @@ public class PlayerController : MonoBehaviour
 
     private void CalculateVerticalSpeed()
     {
+        if (m_Grounded && !m_Input.JumpInput)
+            m_readyJump = true;
+
         if (m_Grounded)
         {
             m_VerticalSpeed = -gravity * k_stickyGravitation;
+
+            if(m_readyJump && m_Input.JumpInput)
+            {
+                m_VerticalSpeed = jumpSpeed;
+                m_Grounded = false;
+                m_readyJump = false;
+
+            }
         }
         else
         {
+            if (!m_Input.JumpInput && m_VerticalSpeed > 0.0f)
+                m_VerticalSpeed -= k_fastFall * Time.deltaTime;
+
+            if (Mathf.Approximately(m_VerticalSpeed, 0f))
+                m_VerticalSpeed = 0f;
+
             m_VerticalSpeed -= gravity * Time.deltaTime;
         }
     }
