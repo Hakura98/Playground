@@ -158,6 +158,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   maxForwardSpeed: 4
   gravity: 20
+  maxTurnSpeed: 300
+  minTurnSpeed: 200
 --- !u!114 &208143122
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -13,6 +13,8 @@ public class PlayerController : MonoBehaviour
 
     public float maxForwardSpeed = 4f;
     public float gravity = 20f;
+    public float maxTurnSpeed = 1200f;
+    public float minTurnSpeed = 400f;
 
     #region Membervariable
     protected PlayerInput m_Input;
@@ -22,6 +24,7 @@ public class PlayerController : MonoBehaviour
     protected float m_ForwardSpeed;
     protected float m_VerticalSpeed;
     protected bool m_Grounded = true;
+    protected Quaternion m_Rotation;
     #endregion
 
     #region Hash
@@ -53,6 +56,8 @@ public class PlayerController : MonoBehaviour
     {
         CalculateForwardSpeed();
         CalculateVerticalSpeed();
+        SetRotation();
+        UpdateRotation();
     }
 
     private void OnAnimatorMove()
@@ -63,7 +68,6 @@ public class PlayerController : MonoBehaviour
         {
             RaycastHit hit;
             Ray ray = new Ray(transform.position + Vector3.up * 0.5f, Vector3.down);
-            Debug.Log("My Position: " + transform.position);
 
             if (Physics.Raycast(ray, out hit, k_distanceToGroundRay, Physics.AllLayers, QueryTriggerInteraction.Ignore))
             {
@@ -72,7 +76,7 @@ public class PlayerController : MonoBehaviour
             }
             else
             {
-                movement = m_Animator.deltaPosition;
+                movement = transform.forward * Time.deltaTime * m_ForwardSpeed;
             }
         }
         else
@@ -81,7 +85,6 @@ public class PlayerController : MonoBehaviour
         }
 
         m_CharCtrl.transform.rotation *= m_Animator.deltaRotation;
-        //Debug.Log("Animator delta rotation: " + m_Animator.deltaRotation);
 
         movement += Vector3.up * m_VerticalSpeed * Time.deltaTime;
 
@@ -116,4 +119,21 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    private void SetRotation()
+    {
+        Vector2 Input = m_Input.MovementInput;
+        Vector3 Direction = new Vector3(Input.x, 0f, Input.y);
+
+        Quaternion Offset = Quaternion.FromToRotation(Vector3.forward, Direction.normalized);
+        Quaternion TargetRotation = Quaternion.LookRotation(Offset * transform.forward.normalized);
+        m_Rotation = TargetRotation;
+    }
+
+    private void UpdateRotation()
+    {
+        float rotSpeed = m_DesiredSpeed == 0 ? 0 : m_ForwardSpeed / m_DesiredSpeed;
+        float groundTurnSpeed = Mathf.Lerp(maxTurnSpeed, minTurnSpeed, rotSpeed);
+        m_Rotation = Quaternion.RotateTowards(transform.rotation, m_Rotation, groundTurnSpeed * Time.deltaTime);
+        transform.rotation = m_Rotation;
+    }
 }
