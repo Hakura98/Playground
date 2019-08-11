@@ -47,7 +47,8 @@ public class PlayerInput : MonoBehaviour
         if (m_forceShield)
             StartCoroutine(attackWait());
 
-        
+        if (Input.GetKeyDown(KeyCode.R))
+            Debug.Log("Actual Frame, where roar is beeing pressed: " + Time.frameCount);
 
     }
 

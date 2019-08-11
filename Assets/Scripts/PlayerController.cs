@@ -18,6 +18,8 @@ public class PlayerController : MonoBehaviour
     public float minTurnSpeed = 400f;
     public float jumpSpeed = 10f;
     public float idleTimout = 5f;
+    public float waitTillShield = 0.5f;
+    public float shieldExpand = 0.1f;
 
     #region Membervariable
     protected PlayerInput m_Input;
@@ -193,22 +195,41 @@ public class PlayerController : MonoBehaviour
 
     private void SetForceShield()
     {
-        MeshRenderer ShieldRenderer = GetComponentInChildren<MeshRenderer>();
-        SphereCollider ShieldCollider = GetComponentInChildren<SphereCollider>();
+
+        m_forceShield = m_Input.ForceShield;
+
         if (m_forceShield)
         {
+            Debug.Log("Framerate while SetForceShield is true: " + Time.frameCount);
             m_Animator.SetBool(m_HashRoar, true);
-            ShieldRenderer.enabled = true;
-            ShieldCollider.enabled = true;
+            StartCoroutine(ActivateForceShield());
         }
         else
         {
             m_Animator.SetBool(m_HashRoar, false);
-            ShieldRenderer.enabled = false;
-            ShieldCollider.enabled = false;
         }
 
-        m_forceShield = m_Input.ForceShield;
+    }
+
+    private bool TriggerForceField()
+    {
+        if (m_Animator.GetNextAnimatorStateInfo(0).IsName("Roar") && m_CurrAnimatorStateInfo.length > waitTillShield)
+            return true;
+        else return false;
+    }
+
+    IEnumerator ActivateForceShield()
+    {
+        yield return new WaitUntil(TriggerForceField);
+
+        GameObject ForceShield = transform.GetChild(3).gameObject;
+        Debug.Log("Childobject: " + ForceShield.name);
+        SphereCollider shieldCollider = ForceShield.GetComponent<SphereCollider>();
+        MeshRenderer shieldRenderer = ForceShield.GetComponent<MeshRenderer>();
+        Shader shieldShader = ForceShield.GetComponent<Shader>();
+
+        shieldCollider.enabled = true;
+        shieldRenderer.enabled = true;
     }
 
     private void TimeOutIdle()
