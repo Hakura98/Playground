@@ -172,12 +172,13 @@ public class PlayerController : MonoBehaviour
         SphereCollider ShieldCollider = GetComponentInChildren<SphereCollider>();
         if (m_forceShield)
         {
-            m_Animator.SetTrigger(m_HashRoar);
+            m_Animator.SetBool(m_HashRoar, true);
             ShieldRenderer.enabled = true;
             ShieldCollider.enabled = true;
         }
         else
         {
+            m_Animator.SetBool(m_HashRoar, false);
             ShieldRenderer.enabled = false;
             ShieldCollider.enabled = false;
         }
