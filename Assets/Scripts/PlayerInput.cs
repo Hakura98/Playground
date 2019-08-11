@@ -16,6 +16,7 @@ public class PlayerInput : MonoBehaviour
     protected Vector2 m_Camera;
     protected bool m_sprinting;
     protected bool m_jumping;
+    protected bool m_forceShield;
 
     private void Awake()
     {
@@ -32,7 +33,7 @@ public class PlayerInput : MonoBehaviour
         m_Camera.Set(Input.GetAxis("Mouse X"), Input.GetAxis("Mouse Y"));
         m_jumping = Input.GetKey(KeyCode.Space);
         m_sprinting = (Input.GetKey(KeyCode.LeftShift));
-
+        m_forceShield = (Input.GetKey("r"));
     }
 
     public Vector2 MovementInput
@@ -53,5 +54,10 @@ public class PlayerInput : MonoBehaviour
     public bool JumpInput
     {
         get { return m_jumping; }
+    }
+
+    public bool ForceShield
+    {
+        get { return m_forceShield; }
     }
 }

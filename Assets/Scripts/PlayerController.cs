@@ -28,12 +28,14 @@ public class PlayerController : MonoBehaviour
     protected bool m_Grounded = true;
     protected Quaternion m_Rotation;
     protected bool m_readyJump = false;
+    protected bool m_forceShield = false;
     #endregion
 
     #region Hash
     readonly int m_HashForwardSpeed = Animator.StringToHash("ForwardSpeed");
     readonly int m_HashGrounded = Animator.StringToHash("Grounded");
     readonly int m_HashVerticalSpeed = Animator.StringToHash("AirVerticalSpeed");
+    readonly int m_HashRoar = Animator.StringToHash("Roar");
     #endregion
 
     #region Constants
@@ -63,6 +65,7 @@ public class PlayerController : MonoBehaviour
         CalculateVerticalSpeed();
         SetRotation();
         UpdateRotation();
+        SetForceShield();
     }
 
     private void OnAnimatorMove()
@@ -162,4 +165,24 @@ public class PlayerController : MonoBehaviour
 
         transform.rotation = m_Rotation;
     }
+
+    private void SetForceShield()
+    {
+        MeshRenderer ShieldRenderer = GetComponentInChildren<MeshRenderer>();
+        SphereCollider ShieldCollider = GetComponentInChildren<SphereCollider>();
+        if (m_forceShield)
+        {
+            m_Animator.SetTrigger(m_HashRoar);
+            ShieldRenderer.enabled = true;
+            ShieldCollider.enabled = true;
+        }
+        else
+        {
+            ShieldRenderer.enabled = false;
+            ShieldCollider.enabled = false;
+        }
+
+        m_forceShield = m_Input.ForceShield;
+    }
+
 }
