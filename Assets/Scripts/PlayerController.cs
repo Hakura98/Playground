@@ -17,6 +17,7 @@ public class PlayerController : MonoBehaviour
     public float maxTurnSpeed = 1200f;
     public float minTurnSpeed = 400f;
     public float jumpSpeed = 10f;
+    public float idleTimout = 5f;
 
     #region Membervariable
     protected PlayerInput m_Input;
@@ -29,6 +30,10 @@ public class PlayerController : MonoBehaviour
     protected Quaternion m_Rotation;
     protected bool m_readyJump = false;
     protected bool m_forceShield = false;
+    protected AnimatorStateInfo m_CurrAnimatorStateInfo;
+    protected AnimatorStateInfo m_NextAnimatorStateInfo;
+    protected bool m_CurrIsTransitioning;
+    protected float m_idleTimer;
     #endregion
 
     #region Hash
@@ -36,6 +41,9 @@ public class PlayerController : MonoBehaviour
     readonly int m_HashGrounded = Animator.StringToHash("Grounded");
     readonly int m_HashVerticalSpeed = Animator.StringToHash("AirVerticalSpeed");
     readonly int m_HashRoar = Animator.StringToHash("Roar");
+    readonly int m_HashIdleTimeOut = Animator.StringToHash("IdleTimeOut");
+    readonly int m_HashInputDetected = Animator.StringToHash("InputDetected");
+    readonly int m_HashBlockInput = Animator.StringToHash("BlockInput");
     #endregion
 
     #region Constants
@@ -44,6 +52,11 @@ public class PlayerController : MonoBehaviour
     const float k_distanceToGroundRay = 1.0f;
     const float k_fastFall = 10f;
     #endregion
+
+    protected bool IsMove
+    {
+        get { return !Mathf.Approximately(m_Input.MovementInput.sqrMagnitude, 0f); }
+    }
 
     private void Awake()
     {
@@ -54,18 +67,19 @@ public class PlayerController : MonoBehaviour
         s_Instance = this;
     }
 
-    private void Start()
-    {
-        m_Animator.applyRootMotion = true;
-    }
-
     private void FixedUpdate()
     {
+        CacheAnimState();
+        UpdateBlockInput();
+
         CalculateForwardSpeed();
         CalculateVerticalSpeed();
         SetRotation();
         UpdateRotation();
+
         SetForceShield();
+
+        TimeOutIdle();
     }
 
     private void OnAnimatorMove()
@@ -91,8 +105,6 @@ public class PlayerController : MonoBehaviour
         {
             movement = transform.forward * Time.deltaTime * m_ForwardSpeed;
         }
-
-        m_CharCtrl.transform.rotation *= m_Animator.deltaRotation;
 
         movement += Vector3.up * m_VerticalSpeed * Time.deltaTime;
 
@@ -147,6 +159,19 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    private void CacheAnimState()
+    {
+        m_CurrAnimatorStateInfo = m_Animator.GetCurrentAnimatorStateInfo(0);
+        m_NextAnimatorStateInfo = m_Animator.GetNextAnimatorStateInfo(0);
+        m_CurrIsTransitioning = m_Animator.IsInTransition(0);
+    }
+
+    private void UpdateBlockInput()
+    {
+        bool blockinput = m_CurrAnimatorStateInfo.tagHash == m_HashBlockInput && !m_CurrIsTransitioning;
+        m_Input.blockInput = blockinput;
+    }
+
     private void SetRotation()
     {
         Vector2 Input = m_Input.MovementInput;
@@ -184,6 +209,30 @@ public class PlayerController : MonoBehaviour
         }
 
         m_forceShield = m_Input.ForceShield;
+    }
+
+    private void TimeOutIdle()
+    {
+        bool inputdetected = IsMove || m_forceShield || m_Input.JumpInput || m_Input.IsSprinting;
+
+        if(!inputdetected && m_Grounded)
+        {
+            m_idleTimer += Time.deltaTime;
+
+            if(m_idleTimer >= idleTimout)
+            {
+                m_idleTimer = 0f;
+                m_Animator.SetTrigger(m_HashIdleTimeOut);
+            }
+        }
+        else
+        {
+            m_idleTimer = 0f;
+            m_Animator.ResetTrigger(m_HashIdleTimeOut);
+        }
+
+        m_Animator.SetBool(m_HashInputDetected, inputdetected);
+
     }
 
 }
