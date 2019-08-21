@@ -11,6 +11,7 @@ public class PlayerController : MonoBehaviour
         get { return s_Instance; }
     }
 
+    #region public variable
     public float maxForwardSpeed = 4f;
     public float walkSpeed = 1f;
     public float gravity = 20f;
@@ -18,8 +19,8 @@ public class PlayerController : MonoBehaviour
     public float minTurnSpeed = 400f;
     public float jumpSpeed = 10f;
     public float idleTimout = 5f;
-    public float waitTillShield = 0.5f;
     public float shieldExpand = 0.1f;
+    #endregion
 
     #region Membervariable
     protected PlayerInput m_Input;
@@ -53,6 +54,8 @@ public class PlayerController : MonoBehaviour
     const float k_stickyGravitation = 0.3f;
     const float k_distanceToGroundRay = 1.0f;
     const float k_fastFall = 10f;
+    const float k_waitTillShield = 0.35f;
+    const float k_fadeShield = 1f;
     #endregion
 
     protected bool IsMove
@@ -198,38 +201,46 @@ public class PlayerController : MonoBehaviour
 
         m_forceShield = m_Input.ForceShield;
 
-        if (m_forceShield)
+        //thisFrameactive is for making sure, setForceShield is active only 1 Frame
+        if (m_forceShield && m_Input.thisFrameactive)
         {
-            Debug.Log("Framerate while SetForceShield is true: " + Time.frameCount);
+            m_Input.thisFrameactive = false;
             m_Animator.SetBool(m_HashRoar, true);
             StartCoroutine(ActivateForceShield());
         }
-        else
+        else if(!m_forceShield)
         {
             m_Animator.SetBool(m_HashRoar, false);
         }
 
     }
 
-    private bool TriggerForceField()
-    {
-        if (m_Animator.GetNextAnimatorStateInfo(0).IsName("Roar") && m_CurrAnimatorStateInfo.length > waitTillShield)
-            return true;
-        else return false;
-    }
-
     IEnumerator ActivateForceShield()
     {
-        yield return new WaitUntil(TriggerForceField);
+        yield return new WaitForSeconds(k_waitTillShield);
 
         GameObject ForceShield = transform.GetChild(3).gameObject;
-        Debug.Log("Childobject: " + ForceShield.name);
         SphereCollider shieldCollider = ForceShield.GetComponent<SphereCollider>();
         MeshRenderer shieldRenderer = ForceShield.GetComponent<MeshRenderer>();
         Shader shieldShader = ForceShield.GetComponent<Shader>();
 
         shieldCollider.enabled = true;
         shieldRenderer.enabled = true;
+
+        StartCoroutine(FadeShield());
+    }
+
+    IEnumerator FadeShield()
+    {
+        yield return new WaitForSeconds(k_fadeShield);
+
+        GameObject ForceShield = transform.GetChild(3).gameObject;
+        SphereCollider shieldCollider = ForceShield.GetComponent<SphereCollider>();
+        MeshRenderer shieldRenderer = ForceShield.GetComponent<MeshRenderer>();
+        Shader shieldShader = ForceShield.GetComponent<Shader>();
+
+        shieldCollider.enabled = false;
+        shieldRenderer.enabled = false;
     }
 
     private void TimeOutIdle()

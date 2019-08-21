@@ -139,6 +139,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   blockInput: 0
+  thisFrameactive: 0
 --- !u!114 &35645680
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -158,7 +159,6 @@ MonoBehaviour:
   minTurnSpeed: 400
   jumpSpeed: 10
   idleTimout: 5
-  waitTillShield: 0.5
   shieldExpand: 0.1
 --- !u!143 &35645681
 CharacterController:
@@ -221,7 +221,6 @@ MonoBehaviour:
   minTurnSpeed: 200
   jumpSpeed: 10
   idleTimout: 5
-  waitTillShield: 0.5
   shieldExpand: 0.1
 --- !u!114 &208143122
 MonoBehaviour:
@@ -236,6 +235,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   blockInput: 0
+  thisFrameactive: 0
 --- !u!1001 &276410980
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1486,6 +1486,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   blockInput: 0
+  thisFrameactive: 0
 --- !u!114 &1907854855
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1505,7 +1506,6 @@ MonoBehaviour:
   minTurnSpeed: 400
   jumpSpeed: 10
   idleTimout: 5
-  waitTillShield: 0.5
   shieldExpand: 0.1
 --- !u!143 &1907854858
 CharacterController:

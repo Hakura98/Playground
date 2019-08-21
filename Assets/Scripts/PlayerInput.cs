@@ -25,6 +25,8 @@ public class PlayerInput : MonoBehaviour
 
     [HideInInspector]
     public bool blockInput;
+    [HideInInspector]
+    public bool thisFrameactive;
 
     private void Awake()
     {
@@ -36,6 +38,8 @@ public class PlayerInput : MonoBehaviour
             throw new UnityException("There can only be one PlayerInput Script.");
     }
 
+    
+
     void Update()
     {
         m_Movement.Set(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
@@ -43,13 +47,10 @@ public class PlayerInput : MonoBehaviour
         m_jumping = Input.GetKey(KeyCode.Space);
         m_sprinting = (Input.GetKey(KeyCode.LeftShift));
         m_forceShield = m_reuseRoar && Input.GetKeyDown(KeyCode.R);
+        thisFrameactive = true;
 
         if (m_forceShield)
             StartCoroutine(attackWait());
-
-        if (Input.GetKeyDown(KeyCode.R))
-            Debug.Log("Actual Frame, where roar is beeing pressed: " + Time.frameCount);
-
     }
 
     IEnumerator attackWait()
@@ -59,6 +60,7 @@ public class PlayerInput : MonoBehaviour
         yield return m_attackWaitSeconds;
 
         m_reuseRoar = true;
+
     }
 
     public Vector2 MovementInput
@@ -95,5 +97,4 @@ public class PlayerInput : MonoBehaviour
     {
         get { return m_forceShield && !blockInput; }
     }
-
 }
